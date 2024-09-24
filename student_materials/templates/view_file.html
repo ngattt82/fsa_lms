@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Viewing: {{ file.file.name }}</h2>
+  <embed src="{{ file.file.url }}" width="100%" height="600px" />
+{% endblock %}
