@@ -6,7 +6,6 @@ from django.http import HttpResponse
 from django.contrib import messages
 from .forms import UserForm, RoleForm, ExcelImportForm
 import openpyxl
-import csv
 from module_group.models import ModuleGroup
 from .forms import AssignTrainingProgramForm
 
@@ -28,47 +27,7 @@ def assign_training_programs(request, user_id):
 def user_list(request):
     users = User.objects.all()
     module_groups = ModuleGroup.objects.all()
-    if request.method == 'POST':
-        form = ExcelImportForm(request.POST, request.FILES)
-        if form.is_valid():
-            uploaded_file = request.FILES['excel_file']
-            try:
-                df = pd.read_excel(uploaded_file)
-
-                for index, row in df.iterrows():
-                    username = row.get("username")
-                    password = str(row.get("password"))
-                    email = row.get("email")
-                    full_name = row.get("full_name")
-                    role_id = row.get("role_id")
-
-                    # Handling the role with proper validation
-                    role = Role.objects.filter(id=role_id).first()
-                    if not role:
-                        messages.error(request, f"Invalid role ID '{role_id}' for user '{username}'. Skipping.")
-                        continue
-
-                    # Hash the password before saving the user
-                    hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode()
-
-                    # Insert the user into the database
-                    if not User.objects.filter(username=username).exists():
-                        User.objects.create(
-                            username=username,
-                            password=hashed_password,
-                            email=email,
-                            full_name=full_name,
-                            role=role
-                        )
-                    else:
-                        messages.warning(request, f"User '{username}' already exists. Skipping.")
-
-                messages.success(request, "Users imported successfully!")
-            except Exception as e:
-                messages.error(request, f"An error occurred during import: {e}")
-            return redirect('user:user_list')
-    else:
-        form = ExcelImportForm()
+    form = ExcelImportForm()
 
     return render(request, 'user_list.html', {'users': users, 'module_groups': module_groups, 'form': form})
 
@@ -125,7 +84,7 @@ def user_edit(request, pk):
 def export_users(request):
     # Create a workbook and add a worksheet
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename=users.xlsx'
+    response['Content-Disposition'] = 'attachment; filename=lms_users.xlsx'
     
     workbook = openpyxl.Workbook()
     worksheet = workbook.active

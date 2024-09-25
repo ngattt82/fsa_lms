@@ -3,45 +3,16 @@ from .models import Role
 from .forms import RoleForm, ExcelImportForm
 import pandas as pd
 from django.contrib import messages
-import bcrypt
 from module_group.models import ModuleGroup
 from django.http import HttpResponse
 import openpyxl
 
 # Role views
-
 def role_list(request):
     roles = Role.objects.all()  # Lấy danh sách các role
     module_groups = ModuleGroup.objects.all()
 
-    if request.method == 'POST':
-        form = ExcelImportForm(request.POST, request.FILES)
-        if form.is_valid():
-            uploaded_file = request.FILES['excel_file']
-            try:
-                df = pd.read_excel(uploaded_file)
-
-                for index, row in df.iterrows():
-                    role_id = row.get("role_id")
-                    role_name = row.get("role_name")
-
-                    # Kiểm tra xem role đã tồn tại chưa
-                    if Role.objects.filter(role_id=role_id).exists():
-                        messages.warning(request, f"Role ID '{role_id}' already exists. Skipping.")
-                        continue
-
-                    # Tạo và lưu role mới
-                    Role.objects.create(
-                        role_id=role_id,
-                        role_name=role_name
-                    )
-
-                messages.success(request, "Roles imported successfully!")
-            except Exception as e:
-                messages.error(request, f"An error occurred during import: {e}")
-            return redirect('role:role_list')
-    else:
-        form = ExcelImportForm()
+    form = ExcelImportForm()
 
     return render(request, 'role_list.html', {'module_groups': module_groups, 'roles': roles, 'form': form})
 
@@ -89,19 +60,19 @@ def role_delete(request, pk):
 def export_roles(request):
     # Create a workbook and add a worksheet
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename=roles.xlsx'
+    response['Content-Disposition'] = 'attachment; filename=lms_roles.xlsx'
     
     workbook = openpyxl.Workbook()
     worksheet = workbook.active
     worksheet.title = 'Roles'
     
     # Define the columns
-    columns = ['Role ID', 'Role Name']  # Cột cho ID và Tên vai trò
+    columns = ['role_name']  # Cột cho ID và Tên vai trò
     worksheet.append(columns)
     
     # Fetch all roles and write to the Excel file
     for role in Role.objects.all():
-        worksheet.append([role.id, role.role_name])  # Xuất ID và Tên vai trò
+        worksheet.append([role.role_name])  # Xuất ID và Tên vai trò
     
     workbook.save(response)
     return response
