@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load static %} 
 {% block title %}User List{% endblock %}
 
 {% block content %}
@@ -73,6 +73,11 @@
       <div class="modal-body">
         <!-- Import Form -->
         <form method="post" enctype="multipart/form-data" action="{% url 'user:import_users' %}">
+          <div class="mb-4">
+            <span>
+              Please download and use the <a href="{% static 'excel/import_users.xlsx' %}" target="_blank">Excel template</a>. The Excel file must contain exactly one sheet with the required columns.
+            </span>
+          </div>
           {% csrf_token %}
           {{ form.as_p }}
           <div class="form-group">

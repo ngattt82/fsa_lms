@@ -132,12 +132,12 @@ def export_users(request):
     worksheet.title = 'Users'
     
     # Define the columns
-    columns = ['Username', 'Email', 'Full Name', 'Role']
+    columns = ['username', 'password', 'email', 'full_name', 'role_id', 'role_name']
     worksheet.append(columns)
     
     # Fetch all users and write to the Excel file
     for user in User.objects.all():
-        worksheet.append([user.username, user.email, user.full_name, str(user.role)])
+        worksheet.append([user.username, '******', user.email, user.full_name, user.role.id, str(user.role)])
     
     workbook.save(response)
     return response

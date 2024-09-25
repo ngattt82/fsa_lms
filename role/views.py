@@ -4,13 +4,16 @@ from .forms import RoleForm, ExcelImportForm
 import pandas as pd
 from django.contrib import messages
 import bcrypt
+from module_group.models import ModuleGroup
+from django.http import HttpResponse
+import openpyxl
 
-
-# Create your views here.
 # Role views
 
 def role_list(request):
     roles = Role.objects.all()  # Lấy danh sách các role
+    module_groups = ModuleGroup.objects.all()
+
     if request.method == 'POST':
         form = ExcelImportForm(request.POST, request.FILES)
         if form.is_valid():
@@ -40,7 +43,7 @@ def role_list(request):
     else:
         form = ExcelImportForm()
 
-    return render(request, 'role_list.html', {'roles': roles, 'form': form})
+    return render(request, 'role_list.html', {'module_groups': module_groups, 'roles': roles, 'form': form})
 
 def insert_role(role_id, role_name):
     try:
@@ -81,9 +84,6 @@ def role_delete(request, pk):
         return redirect('role:role_list')
     return render(request, 'role_confirm_delete.html', {'role': role})
 
-from django.http import HttpResponse
-import openpyxl
-from .models import Role  # Nhớ import model Role
 
 # Export Roles to Excel
 def export_roles(request):
