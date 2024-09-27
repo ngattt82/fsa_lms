@@ -1,9 +1,9 @@
 from django.db import models
-from user.models import User  # Ensure User model path is correct
+from user.models import CustomUser  # Ensure User model path is correct
 from module_group.models import Module  # Ensure Module model path is correct
 
 class UserModule(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     module = models.ForeignKey(Module, on_delete=models.CASCADE)
 
     class Meta:

@@ -1,6 +1,6 @@
 from django import forms
 from .models import TrainingProgram
-from user.models import User
+from user.models import CustomUser
 
 # Form for creating and editing training programs
 class TrainingProgramForm(forms.ModelForm):

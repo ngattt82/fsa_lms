@@ -1,11 +1,11 @@
 from django import forms
-from .models import User, Role
+from .models import CustomUser, Role
 from training_program.models import TrainingProgram
 
 # Form for creating and editing users
 class UserForm(forms.ModelForm):
     class Meta:
-        model = User
+        model = CustomUser
         fields = ['username', 'password', 'email', 'full_name', 'role']
         widgets = {
             'password': forms.PasswordInput(),
@@ -30,6 +30,6 @@ class AssignTrainingProgramForm(forms.ModelForm):
     )
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = ['training_programs']
 

@@ -7,3 +7,4 @@ class TrainingProgram(models.Model):
 
     def __str__(self):
         return self.program_name
+

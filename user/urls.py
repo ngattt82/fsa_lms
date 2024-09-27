@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+
 app_name = 'user'
 
 urlpatterns = [
@@ -10,4 +11,5 @@ urlpatterns = [
     path('import/', views.import_users, name='import_users'),
     path('export/', views.export_users, name='export_users'),
     path('user/<int:user_id>/assign-programs/', views.assign_training_programs, name='assign_training_programs'),
+    
 ]

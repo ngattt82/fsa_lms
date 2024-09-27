@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import User, Role
+from .models import CustomUser, Role
 import pandas as pd
 import bcrypt
 from django.http import HttpResponse
@@ -9,23 +9,11 @@ import openpyxl
 from module_group.models import ModuleGroup
 from .forms import AssignTrainingProgramForm
 
-def assign_training_programs(request, user_id):
-    user = get_object_or_404(User, id=user_id)
-    
-    if request.method == 'POST':
-        form = AssignTrainingProgramForm(request.POST, instance=user)
-        if form.is_valid():
-            form.save()  # This will save the M2M relationship
-            messages.success(request, f"Training programs have been successfully assigned to {user.username}.")
-            return redirect('user:user_list')  # Redirect to your desired page after success
-    else:
-        form = AssignTrainingProgramForm(instance=user, initial={'training_programs': user.training_programs.all()})
 
-    return render(request, 'assign_training_programs.html', {'user': user, 'form': form})
 
 
 def user_list(request):
-    users = User.objects.all()
+    users = CustomUser.objects.all()
     module_groups = ModuleGroup.objects.all()
     form = ExcelImportForm()
 
@@ -43,7 +31,7 @@ def get_role_quick_and_dirty_way(role_id):
 
 def insert_user(username, hashed_password, email, full_name, role_id):
     try:
-        User.objects.create(
+        CustomUser.objects.create(
             username=username,
             password=hashed_password.decode('utf-8'),
             email=email,
@@ -56,8 +44,9 @@ def insert_user(username, hashed_password, email, full_name, role_id):
 
 
 def user_detail(request, pk):
-    user = get_object_or_404(User, pk=pk)
+    user = get_object_or_404(CustomUser, pk=pk)
     return render(request, 'user_detail.html', {'user': user})
+
 
 def user_add(request):
     if request.method == 'POST':
@@ -69,8 +58,9 @@ def user_add(request):
         form = UserForm()
     return render(request, 'user_form.html', {'form': form})
 
+
 def user_edit(request, pk):
-    user = get_object_or_404(User, pk=pk)
+    user = get_object_or_404(CustomUser, pk=pk)
     if request.method == 'POST':
         form = UserForm(request.POST, instance=user)
         if form.is_valid():
@@ -79,6 +69,21 @@ def user_edit(request, pk):
     else:
         form = UserForm(instance=user)
     return render(request, 'user_form.html', {'form': form})
+
+
+def assign_training_programs(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+    
+    if request.method == 'POST':
+        form = AssignTrainingProgramForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()  # This will save the M2M relationship
+            messages.success(request, f"Training programs have been successfully assigned to {user.username}.")
+            return redirect('user:user_list')  # Redirect to your desired page after success
+    else:
+        form = AssignTrainingProgramForm(instance=user, initial={'training_programs': user.training_programs.all()})
+
+    return render(request, 'assign_training_programs.html', {'user': user, 'form': form})
 
 # Export Users to Excel
 def export_users(request):
@@ -95,7 +100,7 @@ def export_users(request):
     worksheet.append(columns)
     
     # Fetch all users and write to the Excel file
-    for user in User.objects.all():
+    for user in CustomUser.objects.all():
         worksheet.append([user.username, '******', user.email, user.full_name, user.role.id, str(user.role)])
     
     workbook.save(response)
@@ -132,9 +137,9 @@ def import_users(request):
                     hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode()
 
                     # Check if the user already exists
-                    if not User.objects.filter(username=username).exists():
+                    if not CustomUser.objects.filter(username=username).exists():
                         # Create and save the new user
-                        User.objects.create(
+                        CustomUser.objects.create(
                             username=username,
                             password=hashed_password,
                             email=email,
@@ -145,7 +150,7 @@ def import_users(request):
                         print(f"User {username} created")  # Debugging
                     else:
                         messages.warning(request, f"User '{username}' already exists. Skipping.")
-                        print(f"User {username} already exists")  # Debugging
+                        print(f"CustomUser {username} already exists")  # Debugging
 
                 # Feedback message
                 if users_imported > 0:

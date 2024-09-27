@@ -13,30 +13,47 @@
                     <h5 class="text-center mb-0" style="color: white;">{{ course_name }}</h5>
                 </div>
 
-                <ul class="nav flex-column">
-                    {% for sub_course in split_sub_courses %}
-                    <li class="nav-item">
-                        <h2 class="title_sub_course" style="color: white;">{{ sub_course.title }}</h2>
-                        <p class="description_sub_course" style="color: #ccc;">{{ sub_course.description }}</p>
+                <!-- Dropdown for Excel file selection -->
+                <form method="GET" action=".">
+                    <div class="form-group">
+                        <label for="fileSelect" style="color: white;">Select a file:</label>
+                        <select class="form-control" id="fileSelect" name="selected_file" onchange="this.form.submit()">
+                            <option value="">-- Select Excel File --</option>
+                            {% for file in excel_files %}
+                                <option value="{{ file }}" {% if file == selected_file %}selected{% endif %}>{{ file|slice:":-5" }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
 
-                        {% for module, sub_modules in sub_course.modules.items %}
-                        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#module{{ forloop.parentloop.counter }}-{{ forloop.counter }}" aria-expanded="false" aria-controls="module{{ forloop.parentloop.counter }}-{{ forloop.counter }}" style="color: #fff;">
-                            {{ module }}
-                        </a>
-                        <div class="collapse" id="module{{ forloop.parentloop.counter }}-{{ forloop.counter }}">
-                            <ul class="nav flex-column ml-3">
-                                {% for sub_module_data in sub_modules %}
-                                <li class="nav-item">
-                                    <a class="nav-link sub-module" href="#" data-sub-module="{{ sub_module_data.sub_module }}" style="color: #ddd;">
-                                        {{ sub_module_data.sub_module }}
-                                    </a>
-                                </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
+                <ul class="nav flex-column">
+                    {% if split_sub_courses %}
+                        {% for sub_course in split_sub_courses %}
+                        <li class="nav-item">
+                            <h2 class="title_sub_course" style="color: white;">{{ sub_course.title }}</h2>
+                            <p class="description_sub_course" style="color: #ccc;">{{ sub_course.description }}</p>
+
+                            {% for module, sub_modules in sub_course.modules.items %}
+                            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#module{{ forloop.parentloop.counter }}-{{ forloop.counter }}" aria-expanded="false" aria-controls="module{{ forloop.parentloop.counter }}-{{ forloop.counter }}" style="color: #fff;">
+                                {{ module }}
+                            </a>
+                            <div class="collapse" id="module{{ forloop.parentloop.counter }}-{{ forloop.counter }}">
+                                <ul class="nav flex-column ml-3">
+                                    {% for sub_module_data in sub_modules %}
+                                    <li class="nav-item">
+                                        <a class="nav-link sub-module" href="#" data-sub-module="{{ sub_module_data.sub_module }}" style="color: #ddd;">
+                                            {{ sub_module_data.sub_module }}
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endfor %}
+                        </li>
                         {% endfor %}
-                    </li>
-                    {% endfor %}
+                    {% else %}
+                        <p style="color: #ccc;">Please select a file to view its content.</p>
+                    {% endif %}
                 </ul>
             </div>
         </nav>
