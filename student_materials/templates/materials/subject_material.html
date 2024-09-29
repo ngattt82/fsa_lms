@@ -119,7 +119,7 @@
         })
         .then(subjects => {
             // Update the subject list
-            alert('subject list')
+            
             let subjectList = document.getElementById('subjectList');
             subjectList.innerHTML = '';
             subjects.forEach(subject => {
@@ -143,7 +143,6 @@
     // Function to select subject and load its material types
     function selectSubject(subjectId) {
         // AJAX request to fetch material types for the selected subject
-        
         fetch(`/student_materials/api/subjects/${subjectId}/material_types`)
             .then(response => response.json())
             .then(materialTypes => {
