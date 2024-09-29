@@ -77,8 +77,71 @@ def delete_material(request, pk):
         messages.success(request, 'Material deleted successfully.')
     return redirect('subject:subject_materials', subject_id=subject.pk)
 
-
 def upload_material(request):
+    if request.method == 'POST':
+        subject_id = request.POST.get('subject_id')
+        subject = get_object_or_404(Subject, pk=subject_id)
+        material_type = request.POST['material_type']
+        
+        # Get the files and Google Drive link
+        files = request.FILES.getlist('file')
+        google_drive_link = request.POST.get('google_drive_link')
+
+        if files:
+            # If files are provided, save them
+            for file in files:
+                material = Material(file=file, subject=subject, material_type=material_type)
+                material.save()
+        elif google_drive_link:
+            # If a Google Drive link is provided, save it
+            material = Material(google_drive_link=google_drive_link, subject=subject, material_type=material_type)
+            material.save()
+        else:
+            # If neither file nor Google Drive link is provided, show an error
+            messages.error(request, 'Please upload a file or provide a Google Drive link.')
+            return redirect('subject:subject_materials', subject_id=subject.pk)
+
+        messages.success(request, 'Materials uploaded successfully.')
+        return redirect('subject:subject_materials', subject_id=subject.pk)
+
+    subjects = Subject.objects.all()
+    form = MaterialUploadForm()  # Create an instance of the form
+    return render(request, 'materials/upload_materials.html', {
+        'subjects': subjects,
+        'form': form,  # Pass the form to the template
+    })
+
+
+def upload_material3(request):
+    if request.method == 'POST':
+        subject_id = request.POST.get('subject_id')
+        subject = get_object_or_404(Subject, pk=subject_id)
+        material_type = request.POST['material_type']
+        google_drive_link = request.POST.get('google_drive_link')
+
+        files = request.FILES.getlist('file')
+
+        # Check if files were uploaded or a Google Drive link was provided
+        if files:
+            for file in files:
+                material = Material(file=file, subject=subject, material_type=material_type)
+                material.save()
+        elif google_drive_link:
+            material = Material(google_drive_link=google_drive_link, subject=subject, material_type=material_type)
+            material.save()
+
+        messages.success(request, 'Materials uploaded successfully.')
+        return redirect('subject:subject_materials', subject_id=subject.pk)
+
+    subjects = Subject.objects.all()
+    form = MaterialUploadForm()  # Create an instance of the form
+    return render(request, 'materials/upload_materials.html', {
+        'subjects': subjects,
+        'form': form,  # Pass the form to the template
+    })
+
+
+def upload_material2(request):
     if request.method == 'POST':
         subject_id = request.POST.get('subject_id')
         subject = get_object_or_404(Subject, pk=subject_id)
@@ -105,6 +168,8 @@ def upload_material(request):
 def subject_materials(request, subject_id):
     subject = get_object_or_404(Subject, pk=subject_id)
     
+    materials = Material.objects.filter(subject=subject)
+
     # Retrieve the materials
     assignments = subject.materials.filter(material_type='assignments')
     labs = subject.materials.filter(material_type='labs')
@@ -119,6 +184,7 @@ def subject_materials(request, subject_id):
 
     return render(request, 'materials/subject_materials.html', {
         'subject': subject,
+        'materials': materials,
         'assignments': assignments,
         'labs': labs,
         'lectures': lectures,

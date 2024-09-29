@@ -38,6 +38,9 @@ urlpatterns = [
     path('user_module/', include('user_module.urls')),  
     path('tools/', include('tools.urls')),
     path('home/', include('home.urls')),
+    path('student_materials/', include('student_materials.urls')),
          
     # Add more paths for other new apps here
 ]
+from django.urls import get_resolver
+print(get_resolver().url_patterns)

@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'user_module',
     'tools',
     'home',
+    'student_materials'
 ]
 
 

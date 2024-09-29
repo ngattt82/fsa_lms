@@ -9,8 +9,7 @@ class Subject(models.Model):
 
     def __str__(self):
         return self.name
-
-
+    
 class Material(models.Model):
     MATERIAL_TYPE_CHOICES = [
         ('assignments', 'Assignments'),
@@ -21,7 +20,8 @@ class Material(models.Model):
     
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='materials')
     material_type = models.CharField(max_length=20, choices=MATERIAL_TYPE_CHOICES)
-    file = models.FileField(upload_to='')  # We will customize the upload path in a method
+    file = models.FileField(upload_to='', blank=True, null=True)  # Make file optional
+    google_drive_link = models.URLField(max_length=500, blank=True, null=True)  # Add Google Drive link field
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -35,8 +35,9 @@ class Material(models.Model):
         return 'No file'
 
     def save(self, *args, **kwargs):
-        # Generate the folder path dynamically based on subject's code and material type
-        self.file.field.upload_to = self.get_upload_path()
+        if self.file:
+            # Set the upload path if a file is provided
+            self.file.field.upload_to = self.get_upload_path()
         super().save(*args, **kwargs)
 
     def get_upload_path(self):
