@@ -12,8 +12,7 @@ from django.contrib.auth.decorators import login_required
 
 # views.py
 from django.http import JsonResponse
-from subject.models import Subject, Material
-
+from django.db import models  # Import the models module
 
 def get_subjects(request, training_program_id):
     # Fetch subjects related to the training program through the intermediary model
@@ -21,9 +20,6 @@ def get_subjects(request, training_program_id):
     subjects = Subject.objects.filter(trainingprogramsubjects__in=training_program_subjects).values('id', 'name')
     
     return JsonResponse(list(subjects), safe=False)
-from django.http import JsonResponse
-from django.db import models  # Import the models module
-from subject.models import Material
 
 def get_material_types(request, subject_id):
     # Fetch materials related to the given subject and group by file type
@@ -60,6 +56,34 @@ def material_types(request, subject_id):
     return JsonResponse({'materials': data}, status=200)
 
 
+def display_materials_by_type(request, material_type):
+    # Fetch materials by type (e.g., 'assignments', 'labs', etc.)
+    materials = Material.objects.filter(material_type=material_type)
+    material_data = []
+
+    for material in materials:
+        if material.file:  # If a file is uploaded
+            file_type = material.get_file_type()  # Get the MIME type
+            file_url = material.file.url
+        elif material.google_drive_link:  # If a Google Drive link is provided
+            file_type = 'Google Drive Link'  # Indicate this is a link
+            file_url = material.google_drive_link
+        else:
+            file_type = 'No file'
+            file_url = None  # No URL to provide
+
+        material_data.append({
+            'id': material.id,
+            'name': material.file.name if material.file else 'N/A',
+            'file_type': file_type,
+            'size': material.file.size if material.file else None,
+            'url': file_url,
+        })
+    print(material_data)
+    return JsonResponse(material_data, safe=False)
+
+
+
 def view_pdf(request, google_drive_link):
     # Check if the link is for a folder
     if "folders" in google_drive_link:
@@ -78,6 +102,7 @@ def view_pdf(request, google_drive_link):
 
     # Pass both the link and the flag to the template
     return render(request, 'materials/view_pdf.html', {'google_drive_link': embed_link, 'is_folder': is_folder})
+
 
 # @login_required
 def select_material(request):
