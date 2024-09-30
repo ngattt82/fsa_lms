@@ -79,7 +79,7 @@ def display_materials_by_type(request, material_type):
             'size': material.file.size if material.file else None,
             'url': file_url,
         })
-    print(material_data)
+
     return JsonResponse(material_data, safe=False)
 
 

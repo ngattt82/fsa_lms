@@ -146,16 +146,14 @@ function selectMaterialType(materialType) {
             materialListBody.innerHTML = '';
 
             materials.forEach((material, index) => {
+                
                 let row = document.createElement('tr');
-
-                // Ensure that material.id is valid
                 if (material.id) {
                     // Check if the material has a Google Drive link
                     if (material.google_drive_link) {
                         // If it's a folder
                         if (material.google_drive_link.is_folder) {
                             row.innerHTML = `
-                                <td>${index + 1}</td>
                                 <td colspan="5">
                                     <a href="${material.google_drive_link}" class="btn btn-info" target="_blank">
                                         <i class="fas fa-folder-open"></i> View in Google Drive
@@ -166,23 +164,15 @@ function selectMaterialType(materialType) {
                             // If it's a file
                             row.innerHTML = `
                                 <td>${index + 1}</td>
-                                <td colspan="4">
-                                    <a href="/student_materials/view_pdf/${material.google_drive_link}" class="btn btn-info" target="_blank">
+                                <td>
+                                    <a href="${material.google_drive_link}" class="btn btn-info" target="_blank">
                                         <i class="fas fa-cloud"></i> View PDF
                                     </a>
                                 </td>
-                            `;
-
-                        }
-                    } else {
-                        // If no Google Drive link, show local file info
-                        row.innerHTML = `
-                                <td>${index + 1}</td>
-                                <td><a href="${material.url}" target="_blank">${material.name}</a></td>
                                 <td>${material.file_type}</td>
-                                <td>${material.size} bytes</td> <!-- Adjusted to show size -->
+                                <td>${material.size} bytes</td>
                                 <td>
-                                    <a href="${material.url}" class="btn btn-primary btn-sm" download>
+                                    <a href="${material.file.url}" class="btn btn-primary btn-sm" download>
                                         <i class="fas fa-download"></i>
                                     </a>
                                     <a href="/student_materials/view_material/${material.id}/" class="btn btn-info btn-sm" target="_blank">
@@ -190,10 +180,24 @@ function selectMaterialType(materialType) {
                                     </a>
                                 </td>
                             `;
-                    }
-
-                    materialListBody.appendChild(row);
-                } else {
+                        }
+                    } else {
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><a href="${material.url}" target="_blank">${material.name}</a></td>
+                    <td>${material.file_type}</td>
+                    <td>${material.size} bytes</td> <!-- Adjusted to show size -->
+                    <td>
+                        <a href="${material.url}" class="btn btn-primary btn-sm" download>
+                            <i class="fas fa-download"></i>
+                        </a>
+                        <a href="/student_materials/view_material/${material.id}/" class="btn btn-info btn-sm" target="_blank">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                    </td>
+                `;
+                materialListBody.appendChild(row);
+            } else {
                     console.error(`Material ID is missing for material:`, material);
                 }
             });
@@ -205,7 +209,6 @@ function selectMaterialType(materialType) {
             console.error('Error fetching materials:', error);
         });
 }
-
 
 </script>
 
