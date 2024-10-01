@@ -4,6 +4,13 @@
 {% load material_tags %}
 
 {% block content %}
+<style>
+    .selected {
+    background-color: #f0f8ff; /* Light blue highlight */
+    font-weight: bold;
+}
+
+</style>
 <div class="container-fluid">
     <h2>Materials for [{{ selected_subject.code }} - {{ selected_subject.name }}]</h2>
 
@@ -13,7 +20,7 @@
             <h5>Training Programs</h5>
             <ul class="list-group">
                 {% for program in training_programs %}
-                    <li class="list-group-item {% if program.id == selected_training_program.id %}active{% endif %}" 
+                    <li class="list-group-item program {% if program.id == selected_training_program.id %}active{% endif %}" 
                         onclick="selectTrainingProgram({{ program.id }})">
                         {{ program.program_name }}
                     </li>
@@ -23,11 +30,11 @@
             </ul>
 
             <!-- Subjects Selection -->
-            <div id="subjects-container" style="display: {% if selected_training_program %}block{% else %}none{% endif %};">
+            <div id="subjects-container">
                 <h5>Subjects</h5>
                 <ul class="list-group" id="subjectList">
                     {% for subject in subjects %}
-                        <li class="list-group-item {% if subject.id == selected_subject.id %}active{% endif %}" 
+                        <li class="list-group-item subject {% if subject.id == selected_subject.id %}active{% endif %}" 
                             onclick="selectSubject({{ subject.id }})">
                             {{ subject.name }}
                         </li>
@@ -42,13 +49,14 @@
                 <h5>Material Types</h5>
                 <ul class="list-group" id="materialTypeList">
                     {% for material_type, material_count in material_types.items %}
-                        <li class="list-group-item" onclick="selectMaterialType('{{ material_type }}')">
+                        <li class="list-group-item material" onclick="selectMaterialType('{{ selected_subject.id }}', '{{ material_type }}')">
                             {{ material_type }} ({{ material_count }} files)
                         </li>
                     {% endfor %}
                 </ul>
             </div>
         </nav>
+        
 
         <!-- Material Listing Section -->
 <div class="col-sm-9">
@@ -73,8 +81,23 @@
 
 
 <script>
-    // Function to select training program and load its subjects
-    function selectTrainingProgram(programId) {
+        // Function to select training program and load its subjects
+        function selectTrainingProgram(programId) {
+            // Remove 'selected' class from the previously selected program, if any
+        const previouslySelected = document.querySelector('.program.selected');
+        if (previouslySelected) {
+            previouslySelected.classList.remove('selected'); // Corrected class name
+        }
+
+        // Highlight the selected training program
+        const currentProgram = document.querySelector('.program.list-group-item[onclick="selectTrainingProgram(' + programId + ')"]');
+        if (currentProgram) {
+            currentProgram.classList.add('selected');
+        } else {
+            console.error(`No program found with ID: program-${programId}`);
+            return;  // Exit if the currentProgram does not exist
+        }
+
         // AJAX request to fetch subjects for the selected training program
         fetch(`/student_materials/api/training_programs/${programId}/subjects/`)
             .then(response => {
@@ -92,6 +115,7 @@
                     let subjectItem = document.createElement('li');
                     subjectItem.className = 'list-group-item';
                     subjectItem.innerText = subject.name;
+                    subjectItem.style.cursor = 'pointer';  // Set cursor to pointer
                     subjectItem.onclick = () => selectSubject(subject.id);
                     subjectList.appendChild(subjectItem);
                 });
@@ -103,35 +127,74 @@
             .catch(error => {
                 console.error('Error fetching subjects:', error);
             });
+
+        // Remove previous highlight
+        
     }
 
     // Function to select subject and load its material types
     function selectSubject(subjectId) {
-        // AJAX request to fetch material types for the selected subject
-        fetch(`/student_materials/api/subjects/${subjectId}/material_types`)
-            .then(response => response.json())
-            .then(materialTypes => {
-                // Update the material type list
-                let materialTypeList = document.getElementById('materialTypeList');
-                materialTypeList.innerHTML = '';
-                for (let materialType in materialTypes) {
-                    let materialItem = document.createElement('li');
-                    materialItem.className = 'list-group-item';
-                    materialItem.innerText = `${materialType} (${materialTypes[materialType]} files)`;
-                    materialItem.onclick = () => selectMaterialType(materialType);
-                    materialTypeList.appendChild(materialItem);
-                }
+            // Remove 'selected' class from previously selected subject
+            const previouslySelectedSubject = document.querySelector('.subject.selected');
+            if (previouslySelectedSubject) {
+                previouslySelectedSubject.classList.remove('selected');
+            }
 
-                // Show the materials container
-                document.getElementById('materials-container').style.display = 'block';
-            });
-    }
+            // Highlight the selected subject
+            const currentSubject = document.querySelector(`.subject[onclick="selectSubject(${subjectId})"]`);
+            if (currentSubject) {
+                currentSubject.classList.add('selected');
+            }
+
+            // AJAX request to fetch material types for the selected subject
+            fetch(`/student_materials/api/subjects/${subjectId}/material_types`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(materialTypes => {
+                    // Update the material type list
+                    let materialTypeList = document.getElementById('materialTypeList');
+                    materialTypeList.innerHTML = '';
+                    for (let materialType in materialTypes) {
+                        let materialItem = document.createElement('li');
+                        materialItem.className = 'list-group-item material';
+                        materialItem.innerText = `${materialType} (${materialTypes[materialType]} files)`;
+                        materialItem.style.cursor = 'pointer';
+                        materialItem.onclick = () => selectMaterialType(subjectId, materialType);
+                        materialTypeList.appendChild(materialItem);
+                    }
+
+                    // Show the materials container
+                    document.getElementById('materials-container').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error fetching material types:', error);
+                });
+        }
 
     
     // Function to load materials of selected material type
-function selectMaterialType(materialType) {
-    // AJAX request to fetch materials for the selected material type
-    fetch(`/student_materials/api/material_types/${materialType}/`)
+function selectMaterialType(subjectId, materialType) {
+    // Remove 'selected' class from previously selected material
+    const previouslySelectedMaterial = document.querySelector('.material.selected');
+    if (previouslySelectedMaterial) {
+        previouslySelectedMaterial.classList.remove('selected'); // Corrected class name
+    }
+
+    // Highlight the selected material
+    const currentMaterial = document.querySelector('.material.list-group-item[onclick="selectMaterialType(\'' + materialType + '\')"]');
+    if (currentMaterial) {
+        currentMaterial.classList.add('selected');
+    } else {
+        console.error(`No material found with ID: material-${materialType}`);
+        return;  // Exit if the currentMaterial does not exist
+    }
+
+    // AJAX request to fetch materials for the selected subject and material type
+    fetch(`/student_materials/api/materials/${subjectId}/${materialType}/`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok: ' + response.statusText);

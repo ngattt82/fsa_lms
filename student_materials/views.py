@@ -30,6 +30,35 @@ def get_material_types(request, subject_id):
     
     return JsonResponse(material_types)
 
+def display_materials_by_type(request, subject_id, material_type):
+    # Fetch the subject by ID to ensure it's valid
+    subject = get_object_or_404(Subject, id=subject_id)
+    
+    # Fetch materials by both subject and type (e.g., 'assignments', 'labs', etc.)
+    materials = Material.objects.filter(subject=subject, material_type=material_type)
+    material_data = []
+
+    for material in materials:
+        if material.file:  # If a file is uploaded
+            file_type = material.get_file_type()  # Get the MIME type
+            file_url = material.file.url
+        elif material.google_drive_link:  # If a Google Drive link is provided
+            file_type = 'Google Drive Link'  # Indicate this is a link
+            file_url = material.google_drive_link
+        else:
+            file_type = 'No file'
+            file_url = None  # No URL to provide
+
+        material_data.append({
+            'id': material.id,
+            'name': material.file.name if material.file else 'N/A',
+            'file_type': file_type,
+            'size': material.file.size if material.file else None,
+            'url': file_url,
+            'is_folder': material.is_folder if hasattr(material, 'is_folder') else False,  # If there's an 'is_folder' attribute
+        })
+
+    return JsonResponse(material_data, safe=False)
 
 # def get_material_types(request, subject_id):
 #     materials = Material.objects.filter(subject_id=subject_id).values('file_type').annotate(file_count=models.Count('file_type'))
@@ -55,32 +84,6 @@ def material_types(request, subject_id):
 
     return JsonResponse({'materials': data}, status=200)
 
-
-def display_materials_by_type(request, material_type):
-    # Fetch materials by type (e.g., 'assignments', 'labs', etc.)
-    materials = Material.objects.filter(material_type=material_type)
-    material_data = []
-
-    for material in materials:
-        if material.file:  # If a file is uploaded
-            file_type = material.get_file_type()  # Get the MIME type
-            file_url = material.file.url
-        elif material.google_drive_link:  # If a Google Drive link is provided
-            file_type = 'Google Drive Link'  # Indicate this is a link
-            file_url = material.google_drive_link
-        else:
-            file_type = 'No file'
-            file_url = None  # No URL to provide
-
-        material_data.append({
-            'id': material.id,
-            'name': material.file.name if material.file else 'N/A',
-            'file_type': file_type,
-            'size': material.file.size if material.file else None,
-            'url': file_url,
-        })
-
-    return JsonResponse(material_data, safe=False)
 
 
 

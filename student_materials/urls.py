@@ -14,5 +14,5 @@ urlpatterns = [
     path('api/subjects/<int:subject_id>/material_types/', views.get_material_types, name='get_material_types'),
     
     # This endpoint should be for displaying materials by type
-    path('api/material_types/<str:material_type>/', views.display_materials_by_type, name='display_materials_by_type'),
+    path('api/materials/<int:subject_id>/<str:material_type>/', views.display_materials_by_type, name='display_materials_by_type'),
 ]
