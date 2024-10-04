@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import TrainingProgram, Subject, TrainingProgramSubjects
+from training_program.models import TrainingProgram
+from subject.models import Subject
+from training_program_subjects.models import TrainingProgramSubjects
 from .forms import TrainingProgramSubjectsForm
 
 # Create your views here.

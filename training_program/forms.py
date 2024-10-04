@@ -1,6 +1,6 @@
 from django import forms
-from .models import TrainingProgram
-from user.models import CustomUser
+from training_program.models import TrainingProgram
+from django.contrib.auth.models import User
 
 # Form for creating and editing training programs
 class TrainingProgramForm(forms.ModelForm):

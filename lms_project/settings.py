@@ -16,7 +16,7 @@ import os
 
 # ...
 
-AUTH_USER_MODEL = 'user.CustomUser'
+LOGIN_URL = 'login'  # Assuming your login URL is named 'login' in urls.py
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'crispy_forms',
     'crispy_bootstrap4',
+    'multiupload',
     'main',
     # 'question_bank', #remove
     'module_group',
@@ -64,8 +65,8 @@ INSTALLED_APPS = [
     # 'quiz',
     'user_module',
     'tools',
-    'home',
-    'student_materials'
+    'courses',
+    'student_materials',
 ]
 
 

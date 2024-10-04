@@ -17,11 +17,14 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-from main.views import home
-
+from main.views import home_view
+from django.contrib.auth import views as auth_views
 urlpatterns = [
     path('admin/', admin.site.urls),
     
+    # Define home view at root
+    path('', home_view, name='home'),  
+    path('login/', auth_views.LoginView.as_view(), name='login'),  # make sure this exists
     path('', include('main.urls')),  # Include the URLs of the main app
     # path('module/', include('module.urls')),         # For module-related views
     path('module_group/', include('module_group.urls')),  
@@ -37,10 +40,8 @@ urlpatterns = [
     path('user/', include('user.urls')),  
     path('user_module/', include('user_module.urls')),  
     path('tools/', include('tools.urls')),
-    path('home/', include('home.urls')),
     path('student_materials/', include('student_materials.urls')),
+    path('courses/', include('courses.urls')),
          
     # Add more paths for other new apps here
 ]
-from django.urls import get_resolver
-print(get_resolver().url_patterns)
